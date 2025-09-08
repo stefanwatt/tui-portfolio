@@ -1,0 +1,23 @@
+export const mocha = {
+  background: '#1e1e2e',
+  foreground: '#cdd6f4',
+  cursor: '#f5c2e7',
+  cursorAccent: '#1e1e2e',
+  selectionBackground: '#45475a',
+  black: '#11111b',
+  red: '#f38ba8',
+  green: '#a6e3a1',
+  yellow: '#f9e2af',
+  blue: '#89b4fa',
+  magenta: '#f5c2e7',
+  cyan: '#94e2d5',
+  white: '#cdd6f4',
+  brightBlack: '#585b70',
+  brightRed: '#eba0ac',
+  brightGreen: '#94e2d5',
+  brightYellow: '#f9e2af',
+  brightBlue: '#74c7ec',
+  brightMagenta: '#cba6f7',
+  brightCyan: '#89dceb',
+  brightWhite: '#ffffff'
+};
