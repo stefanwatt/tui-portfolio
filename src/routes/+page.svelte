@@ -1,46 +1,47 @@
 <script lang="ts">
 	import { mocha } from '$lib/catppuccin';
-
 	let term: any;
-	let lineBuffer = '';
 
-	function terminal(node: HTMLElement) {
-		//@ts-ignore
-		term = new window.Terminal({ theme: mocha });
-		term.open(node);
-		term.write('Hello from \x1B[1;3;31mStefan\x1B[0m\r\n$ '); // newline before prompt
-		setupWasm();
-	}
-
-	async function setupWasm() {
-		//@ts-ignore
-		const go = new Go();
-		const wasmResp = await fetch('/main.wasm');
-		const wasmBuffer = await wasmResp.arrayBuffer();
-		const { instance } = await WebAssembly.instantiate(wasmBuffer, go.importObject);
-		go.run(instance);
-
-		(window as any).receiveLine = (line: string) => {
-			term.write('\r\n' + line + '\r\n$ '); // newline before and after Go output
-		};
-
-		term.onData((data: string) => {
-			for (let ch of data) {
-				if (ch === '\r') {
-					(window as any).sendLine(lineBuffer);
-					lineBuffer = '';
-				} else if (ch === '\u007F') {
-					if (lineBuffer.length > 0) {
-						lineBuffer = lineBuffer.slice(0, -1);
-						term.write('\b \b');
-					}
-				} else {
-					lineBuffer += ch;
-					term.write(ch);
-				}
+	function setupTerminal(node: HTMLElement) {
+		(async () => {
+			// Load Go WASM runtime
+			// @ts-ignore
+			const go = new Go();
+			const wasmResp = await fetch('/main.wasm');
+			const wasmBuffer = await wasmResp.arrayBuffer();
+			const { instance } = await WebAssembly.instantiate(wasmBuffer, go.importObject);
+			go.run(instance);
+			//@ts-ignore
+			if (!window.bubbletea_write) {
+				console.log('bubbletea not ready....gotta wait');
+				setTimeout(() => setupTerminal(node), 500);
+				return;
 			}
-		});
+			// @ts-ignore
+			term = new window.Terminal({ theme: mocha });
+			term.open(node);
+
+			// @ts-ignore
+			const fitAddon = new window.FitAddon.FitAddon();
+			term.loadAddon(fitAddon);
+
+			term.focus();
+			// @ts-ignore
+			window.bubbletea_resize(term.cols, term.rows);
+
+			setInterval(() => {
+				// @ts-ignore
+				const out = window.bubbletea_read();
+				if (out) term.write(out);
+			}, 50);
+
+			// @ts-ignore
+			term.onData((d) => window.bubbletea_write(d));
+			// @ts-ignore
+			term.onResize(() => window.bubbletea_resize(term.cols, term.rows));
+			window.addEventListener('resize', () => fitAddon.fit());
+		})();
 	}
 </script>
 
-<div use:terminal></div>
+<div use:setupTerminal class="h-full w-full"></div>
