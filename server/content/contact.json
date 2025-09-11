@@ -1,0 +1,16 @@
+{
+  "command": "contact",
+  "title": "Get In Touch",
+  "header": "Contact Information",
+  "content": [
+    "Let's connect! You can reach me through:",
+    "",
+    "📧 Email: stefan@example.com",
+    "🐙 GitHub: github.com/stefanwatt",
+    "💼 LinkedIn: linkedin.com/in/stefanwatt",
+    "🐦 Twitter: @stefanwatt",
+    "",
+    "I'm always interested in new opportunities",
+    "and collaborations. Feel free to reach out!"
+  ]
+}

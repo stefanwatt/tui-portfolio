@@ -4,41 +4,57 @@
 
 	function setupTerminal(node: HTMLElement) {
 		(async () => {
-			// Load Go WASM runtime
-			// @ts-ignore
-			const go = new Go();
-			const wasmResp = await fetch('/main.wasm');
-			const wasmBuffer = await wasmResp.arrayBuffer();
-			const { instance } = await WebAssembly.instantiate(wasmBuffer, go.importObject);
-			go.run(instance);
-			//@ts-ignore
-			if (!window.bubbletea_write) {
-				console.log('bubbletea not ready....gotta wait');
-				setTimeout(() => setupTerminal(node), 500);
-				return;
-			}
-			// @ts-ignore
-			term = new window.Terminal({ theme: mocha });
+			term = new (window as any).Terminal({ theme: mocha, convertEol: true });
 			term.open(node);
 
-			// @ts-ignore
-			const fitAddon = new window.FitAddon.FitAddon();
+			const fitAddon = new (window as any).FitAddon.FitAddon();
 			term.loadAddon(fitAddon);
-
 			term.focus();
-			// @ts-ignore
-			window.bubbletea_resize(term.cols, term.rows);
+			fitAddon.fit();
 
-			setInterval(() => {
-				// @ts-ignore
-				const out = window.bubbletea_read();
-				if (out) term.write(out);
-			}, 50);
+			const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
 
-			// @ts-ignore
-			term.onData((d) => window.bubbletea_write(d));
-			// @ts-ignore
-			term.onResize(() => window.bubbletea_resize(term.cols, term.rows));
+			ws.addEventListener('open', () => {
+				// send initial size
+				ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+			});
+
+			ws.addEventListener('message', (ev) => {
+				if (typeof ev.data === 'string') {
+					// Check if it's a console log message
+					try {
+						const data = JSON.parse(ev.data);
+						if (data.type === 'console') {
+							// Log to browser console
+							const logMessage = `[Go ${data.level.toUpperCase()}] ${data.message}`;
+							switch (data.level) {
+								case 'error':
+									console.error(logMessage);
+									break;
+								case 'warn':
+									console.warn(logMessage);
+									break;
+								case 'debug':
+									console.debug(logMessage);
+									break;
+								default:
+									console.log(logMessage);
+							}
+							return; // Don't write to terminal
+						}
+					} catch (e) {
+						// Not JSON, treat as regular terminal output
+					}
+					
+					term.write(ev.data);
+				} else {
+					// assume text for simplicity; browsers may pass Blob
+					(ev.data as Blob).text().then((t) => term.write(t));
+				}
+			});
+
+			term.onData((d: string) => ws.send(d));
+			term.onResize(() => ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows })));
 			window.addEventListener('resize', () => fitAddon.fit());
 		})();
 	}

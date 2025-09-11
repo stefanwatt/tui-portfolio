@@ -1,0 +1,16 @@
+{
+  "command": "about",
+  "title": "About Me",
+  "header": "Stefan Watt - Software Developer",
+  "content": [
+    "I'm a passionate software developer with experience in:",
+    "",
+    "• Go, Rust, TypeScript, Python",
+    "• Web development (React, Svelte, Node.js)",
+    "• System programming and CLI tools",
+    "• Database design and optimization",
+    "",
+    "I love building efficient, user-friendly applications",
+    "and exploring new technologies."
+  ]
+}

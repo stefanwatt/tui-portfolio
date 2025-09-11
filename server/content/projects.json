@@ -1,0 +1,19 @@
+{
+  "command": "projects",
+  "title": "My Projects",
+  "header": "Featured Projects",
+  "content": [
+    "Here are some of my notable projects:",
+    "",
+    "🚀 TUI Portfolio - This interactive terminal portfolio",
+    "   Built with Go, Bubble Tea, and WebSockets",
+    "",
+    "⚡ Fast CLI Tool - High-performance command line utility",
+    "   Written in Rust with async I/O",
+    "",
+    "🌐 Web Dashboard - Real-time analytics dashboard",
+    "   React frontend with Go backend",
+    "",
+    "Check out my GitHub for more projects!"
+  ]
+}
