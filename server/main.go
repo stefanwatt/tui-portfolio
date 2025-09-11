@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	tl "github.com/JoelOtter/termloop"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/gorilla/websocket"
 )
@@ -102,6 +103,9 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 
 	fromClient := &MinReadBuffer{buf: bytes.NewBuffer(nil)}
 	toClient := bytes.NewBuffer(nil)
+
+	// Wire termloop shim IO so the snake game renders to WebSocket
+	tl.SetIO(fromClient, toClient)
 
 	// Output pump → send as text frames
 	ctx, cancel := context.WithCancel(context.Background())

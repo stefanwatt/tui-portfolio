@@ -6,10 +6,13 @@ import (
 	"io"
 	"os/exec"
 	"strings"
+	snake "tui-portfolio/server/snake"
 	"unicode/utf8"
 )
 
-var SPLASH = `
+var (
+	PROMPT = "[stefan.watt@portfolio]$ "
+	SPLASH = `
 			Stefan Watt
 			
       ////\\\\               ⠀⠀⠀⠀⠀⠀ ⢀⣠⣤⣴⣶⣶⠿⠿⠿⠿⠿⠿⢶⣶⣦⣤⣄⡀⠀⠀⠀⠀⠀⠀
@@ -37,6 +40,7 @@ var SPLASH = `
      _|  |  |
  cccC_Cccc___)
 		`
+)
 
 func cli(in io.Reader, out io.Writer, logger *ConsoleLogger) {
 	// Initialize portfolio manager
@@ -55,7 +59,7 @@ func cli(in io.Reader, out io.Writer, logger *ConsoleLogger) {
 	reader := bufio.NewReader(in)
 
 	for {
-		fmt.Fprint(out, "> ")
+		fmt.Fprint(out, PROMPT)
 		var lineRunes []rune
 		for {
 			r, size, err := reader.ReadRune()
@@ -81,9 +85,9 @@ func cli(in io.Reader, out io.Writer, logger *ConsoleLogger) {
 				case "credit":
 					logger.LogInfo("Starting credit card example")
 					return
-				case "snake":
+				case "?":
 					logger.LogInfo("Starting snake game")
-					fmt.Fprintln(out, "snake")
+					snake.StartGame()
 				case "clear":
 					logger.LogDebug("Clearing screen")
 					fmt.Fprint(out, "\033[H\033[2J")
@@ -93,9 +97,8 @@ func cli(in io.Reader, out io.Writer, logger *ConsoleLogger) {
 					fmt.Fprintln(out, "Available commands:")
 					fmt.Fprintln(out, "  help      Show this help message")
 					fmt.Fprintln(out, "  credit    Start the Bubble Tea credit card example")
-					fmt.Fprintln(out, "  snake     Play the Snake game")
+					fmt.Fprintln(out, "  ?         󰪰 A little easter egg. What could it be?")
 					fmt.Fprintln(out, "  clear     Clear the terminal")
-					fmt.Fprintln(out, "  debug     Test console logging")
 					fmt.Fprintln(out, "  quit      Exit the application")
 
 					// Add dynamic portfolio section commands
@@ -108,11 +111,6 @@ func cli(in io.Reader, out io.Writer, logger *ConsoleLogger) {
 							fmt.Fprintf(out, "  %-8s %s\n", cmd, section.Title)
 						}
 					}
-				case "debug":
-					logger.LogInfo("Testing console logging - this should appear in browser console")
-					logger.LogError("This is an error message")
-					logger.LogDebug("This is a debug message")
-					fmt.Fprintln(out, "Debug messages sent to browser console. Check the browser's developer tools console.")
 				default:
 					// Check if it's a portfolio section command
 					logger.LogInfo("Trying to render portfolio section: " + line)

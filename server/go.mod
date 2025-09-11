@@ -11,7 +11,10 @@ require (
 	github.com/gorilla/websocket v1.5.3
 )
 
+require github.com/nsf/termbox-go v1.1.1 // indirect
+
 require (
+	github.com/JoelOtter/termloop v0.0.0-20210806173944-5f7c38744afb
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
@@ -32,3 +35,5 @@ require (
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.3.8 // indirect
 )
+
+replace github.com/JoelOtter/termloop => ./third_party/github.com/JoelOtter/termloop

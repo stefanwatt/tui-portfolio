@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { mocha } from '$lib/catppuccin';
+	import { config } from '$lib/xterm';
 	let term: any;
 
 	function setupTerminal(node: HTMLElement) {
 		(async () => {
-			term = new (window as any).Terminal({ theme: mocha, convertEol: true });
+			term = new (window as any).Terminal(config);
 			term.open(node);
 
 			const fitAddon = new (window as any).FitAddon.FitAddon();
@@ -12,7 +12,9 @@
 			term.focus();
 			fitAddon.fit();
 
-			const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
+			const ws = new WebSocket(
+				(location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'
+			);
 
 			ws.addEventListener('open', () => {
 				// send initial size
@@ -45,7 +47,7 @@
 					} catch (e) {
 						// Not JSON, treat as regular terminal output
 					}
-					
+
 					term.write(ev.data);
 				} else {
 					// assume text for simplicity; browsers may pass Blob
@@ -54,7 +56,9 @@
 			});
 
 			term.onData((d: string) => ws.send(d));
-			term.onResize(() => ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows })));
+			term.onResize(() =>
+				ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }))
+			);
 			window.addEventListener('resize', () => fitAddon.fit());
 		})();
 	}
