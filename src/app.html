@@ -12,12 +12,13 @@
 		<script src="node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Press+Start+2P&display=swap"
+			rel="stylesheet">
 	</head>
 	%sveltekit.head%
 </head>
 
-<body data-sveltekit-preload-data="hover" class="h-screen">
+<body data-sveltekit-preload-data="hover" class="h-screen flex justify-center items-center bg-gray-900">
 	<div class="h-full" style="display: contents">%sveltekit.body%</div>
 </body>
 
@@ -30,5 +31,16 @@
 	.xterm {
 		padding: 0.5rem;
 		overflow-y: hidden;
+	}
+
+	.xterm-viewport {
+		border-radius: 16px;
+		scrollbar-width: none;
+		/* Firefox */
+	}
+
+	.xterm-viewport::-webkit-scrollbar {
+		display: none;
+		/* Chrome, Safari */
 	}
 </style>

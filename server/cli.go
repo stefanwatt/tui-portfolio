@@ -6,6 +6,7 @@ import (
 	"io"
 	"os/exec"
 	"strings"
+	"time"
 	snake "tui-portfolio/server/snake"
 	"unicode/utf8"
 )
@@ -13,8 +14,6 @@ import (
 var (
 	PROMPT = "[stefan.watt@portfolio]$ "
 	SPLASH = `
-			Stefan Watt
-			
       ////\\\\               ⠀⠀⠀⠀⠀⠀ ⢀⣠⣤⣴⣶⣶⠿⠿⠿⠿⠿⠿⢶⣶⣦⣤⣄⡀⠀⠀⠀⠀⠀⠀
       |      |                 ⠀⠀⠀⢀⣴⣾⠿⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠿⣷⣦⡀⠀⠀⠀
      @  O  O  @                ⠀⢀⣴⡿⠋⠀⠀⠀⠀              ⠀⠀⠙⢿⣦⡀⠀
@@ -41,6 +40,62 @@ var (
  cccC_Cccc___)
 		`
 )
+
+// typewriterWriter writes output with a small delay between characters.
+// It passes ANSI escape sequences through without delay and writes newlines immediately.
+type typewriterWriter struct {
+	w     io.Writer
+	delay time.Duration
+}
+
+func (tw *typewriterWriter) Write(p []byte) (int, error) {
+	written := 0
+	for i := 0; i < len(p); {
+		// Pass through ANSI escape sequences quickly
+		if p[i] == 0x1b { // ESC
+			j := i + 1
+			for j < len(p) {
+				b := p[j]
+				// Typical ANSI CSI ends with a letter
+				if (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') {
+					j++
+					break
+				}
+				j++
+			}
+			n, err := tw.w.Write(p[i:j])
+			written += n
+			if err != nil {
+				return written, err
+			}
+			i = j
+			continue
+		}
+
+		r, size := utf8.DecodeRune(p[i:])
+		if r == utf8.RuneError && size == 1 {
+			// write raw byte
+			if _, err := tw.w.Write(p[i : i+1]); err != nil {
+				return written, err
+			}
+			written++
+			i++
+			continue
+		}
+
+		chunk := p[i : i+size]
+		if _, err := tw.w.Write(chunk); err != nil {
+			return written, err
+		}
+		written += size
+
+		if r != '\n' && r != '\r' && r != '\t' && r != ' ' {
+			time.Sleep(tw.delay)
+		}
+		i += size
+	}
+	return written, nil
+}
 
 func cli(in io.Reader, out io.Writer, logger *ConsoleLogger) {
 	// Initialize portfolio manager
@@ -116,7 +171,9 @@ func cli(in io.Reader, out io.Writer, logger *ConsoleLogger) {
 					logger.LogInfo("Trying to render portfolio section: " + line)
 					if section, exists := pm.GetSection(line); exists {
 						logger.LogInfo("Rendering portfolio section: " + line)
-						pm.RenderSection(out, section)
+						// Typewriter effect only for section rendering
+						tw := &typewriterWriter{w: out, delay: 8 * time.Millisecond}
+						pm.RenderSection(tw, section)
 						// Wait for user input to return to main menu
 						reader.ReadString('\n')
 						fmt.Fprint(out, "\033[H\033[2J") // Clear screen

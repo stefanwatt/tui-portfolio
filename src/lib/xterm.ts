@@ -7,6 +7,7 @@ export const config = {
   rows: 40,
   fontSize: 13,
   lineHeight: 1.7,
+  letterSpacing:1.5,
   theme: {
     background: '#000000',
     foreground: '#FFBF00',
